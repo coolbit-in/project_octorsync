@@ -14,7 +14,7 @@ MAX_ERROR_TIMES = 5
 WAITING_TIME = 60*60
 
 #并行上限
-MAX_BUSY_NUM = 2
+MAX_BUSY_NUM = 3
 
 #最小等待间隔(s)
 MIN_WAITING_TIME = 30
@@ -36,8 +36,18 @@ UBUNTU_ARGS = 'rsync -6 -av --delete-after --ignore-errors --force -h' \
               + ' --exclude *.diff.gz' \
               + ' --exclude *.dsc' \
               + ' rsync://mirrors6.ustc.edu.cn/ubuntu' \
-              + MIRROR_ADDR + 'ubuntu'
+              + ' ' + MIRROR_ADDR + 'ubuntu'
 
-DEEPIN_ARGS = 'rsync -6 -av -delete-after --ignore-errors --force -h' \
+DEEPIN_ARGS = 'rsync -6 -av --delete-after --ignore-errors --force -h' \
               + ' rsync://mirrors6.ustc.edu.cn/deepin' \
-              + MIRROR_ADDR + 'deepin'
+              + ' ' + MIRROR_ADDR + 'deepin'
+
+GENTOO_ARGS = 'rsync -6 -av --delete-after --ignore-errors --force -h' \
+              + ' rsync://mirrors6.ustc.edu.cn/gentoo' \
+              + ' ' + MIRROR_ADDR + 'gentoo'
+
+QOMO_ARGS   = 'rsync -6 -av --delete-after --ignore-errors --force -h' \
+              + ' --exclude *.iso' \
+              + ' --exclude *.iso*' \
+              + ' rsync://mirrors6.ustc.edu.cn/qomo' \
+              + ' ' + MIRROR_ADDR + 'qomo'

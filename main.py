@@ -28,13 +28,13 @@ class Controler():
 
     def __log(self):
         while True:
-            self.log_file = open(LOG_ADDR + 'status.log', 'w')
+            self.log_file = open(os.path.join(LOG_ADDR, 'status.log'), 'w', 0)
             sys.stdout = self.log_file
             print time.asctime()
             print 'Busy:%d' % self.busy_num + '   ' + 'Idle:%d' % \
                    (self.queue.len() - self.busy_num)
             for item in self.queue.queue:
-                print item.name + '   ' + item.status
+                print item.name + '   ' + item.status + '   ' + item.last_rsync_time
             self.log_file.close()
             time.sleep(3)
 
@@ -52,15 +52,15 @@ class DistroRsync(threading.Thread):
         self.controler = controler
         self.args = shlex.split(command_line)
         self.status = 'idle'
-        self.last_rsync_time = time.time()
+        self.last_rsync_time = time.asctime()
         self.rsynced_times = 0
         self.waiting_time = WAITING_TIME
         #检测Log路径是否存在
         try:
-            self.log_file = open(os.path.join(LOG_ADDR, name + '.log'), 'a')
+            self.log_file = open(os.path.join(LOG_ADDR, name + '.log'), 'a', 0)
         except IOError:
             os.makedirs(LOG_ADDR)
-            self.log_file = open(os.path.join(LOG_ADDR, name + '.log'), 'a')
+            self.log_file = open(os.path.join(LOG_ADDR, name + '.log'), 'a', 0)
 
     def __re_init(self):
         self.rsynced_times = 0
@@ -73,7 +73,8 @@ class DistroRsync(threading.Thread):
                                   stdout = self.log_file,
                                   stderr = self.log_file)
         self.rsynced_times += 1
-        self.log_file.write('>>>>>>>>>>>>>> %s' % time.asctime() + ' >>>>>>>>>>>>\n')
+        #不起作用，待定
+        #self.log_file.write('>>>>>>>>>>>>>> %s' % time.asctime() + ' >>>>>>>>>>>>\n')
         if retcode == 0:
             return 0
         else:
@@ -87,7 +88,7 @@ class DistroRsync(threading.Thread):
             if self.rsynced_times == MAX_ERROR_TIMES:
                 self.log_file.write("octorsync:Sometime error, %d times\n" 
                                     % MAX_ERROR_TIMES)
-        self.last_rsync_time == time.time()
+        self.last_rsync_time == time.asctime()
         #self.receiver.run(self)
 
     def __sleep(self):
@@ -116,7 +117,7 @@ class DistroRsync(threading.Thread):
 
 
 if __name__ == '__main__':
-    pid_log = open(os.path.join(os.getcwd(), 'octorsync.pid'))
+    pid_log = open(os.path.join(os.getcwd(), 'octorsync.pid'), 'w')
     pid_log.write(str(os.getpid()))
     pid_log.close()
     work_queue = WorkQueue()
@@ -132,6 +133,17 @@ if __name__ == '__main__':
                                 queue = work_queue,
                                 controler = main_controler)
 
-    work_queue.load_items([distro_ubuntu, distro_deepin])
-    print work_queue.queue
+    distro_qomo = DistroRsync(name = 'qomo',
+                                command_line = QOMO_ARGS,
+                                queue = work_queue,
+                                controler = main_controler)
+
+    distro_gentoo = DistroRsync(name = 'gentoo',
+                                command_line = GENTOO_ARGS,
+                                queue = work_queue,
+                                controler = main_controler)
+
+    work_queue.load_items([distro_ubuntu, distro_deepin, distro_qomo, distro_gentoo])
+
+    #print work_queue.queue
     main_controler.run()
