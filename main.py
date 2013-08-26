@@ -6,18 +6,8 @@ import time
 import shlex
 import subprocess
 import threading
-LOG_ADDR = '/Users/liusenyuan/computer/python/project_octorsync/logs/'
-MIRROR_ADDR = ''
+from config_args import *
 
-#单次出错重试次数
-MAX_ERROR_TIMES = 5
-
-#等待间隔
-WAITING_TIME = 25
-
-MAX_BUSY_NUM = 1
-
-MIN_WAITING_TIME = 10
 #工作组
 class WorkQueue():
     def __init__(self):
@@ -29,34 +19,6 @@ class WorkQueue():
 
     def len(self):
         return len(self.queue)
-
-#发射系统
-
-#class Launcher(threading.Thread):
-#    def __init__(self, queue):
-#        threading.Thread.__init__(self)
-#        self.queue = queue
-#
-#    def wait(self, time_now):
-#        if time_now - self.processing_item.last_rsync_time < WAITING_TIME:
-#            time.sleep(WAITING_TIME - (time_now - 
-#                    self.processing_item.last_rsync_time));
-#
-#    def run(self):
-#        while True:
-#            #debug
-#            print self.queue.len()
-#            #debug end
-#            if self.queue.len():
-#                self.processing_item = self.queue.out_queue()
-#                #debug
-#                print self.processing_item.name
-#                #debug
-#                self.wait(time.time())
-#                self.processing_item.start()
-#            else:
-#                time.sleep(10);
-
 
 #控制系统
 class Controler():
@@ -92,8 +54,13 @@ class DistroRsync(threading.Thread):
         self.status = 'idle'
         self.last_rsync_time = time.time()
         self.rsynced_times = 0
-        self.log_file = open(LOG_ADDR + name + '.log', 'a')
         self.waiting_time = WAITING_TIME
+        #检测Log路径是否存在
+        try:
+            self.log_file = open(os.path.join(LOG_ADDR, name + '.log'), 'a')
+        except IOError:
+            os.makedirs(LOG_ADDR)
+            self.log_file = open(os.path.join(LOG_ADDR, name + '.log'), 'a')
 
     def __re_init(self):
         self.rsynced_times = 0
@@ -106,6 +73,7 @@ class DistroRsync(threading.Thread):
                                   stdout = self.log_file,
                                   stderr = self.log_file)
         self.rsynced_times += 1
+        self.log_file.write('>>>>>>>>>>>>>> %s' % time.asctime() + ' >>>>>>>>>>>>\n')
         if retcode == 0:
             return 0
         else:
@@ -148,20 +116,22 @@ class DistroRsync(threading.Thread):
 
 
 if __name__ == '__main__':
-    print os.getpid()
+    pid_log = open(os.path.join(os.getcwd(), 'octorsync.pid'))
+    pid_log.write(str(os.getpid()))
+    pid_log.close()
     work_queue = WorkQueue()
     main_controler = Controler(queue = work_queue)
 
     distro_ubuntu = DistroRsync(name = 'ubuntu',
-                                command_line = 'ls -al',
+                                command_line = UBUNTU_ARGS,
                                 queue = work_queue,
                                 controler = main_controler)
 
-    distro_archlinux = DistroRsync(name = 'archlinux',
-                                command_line = 'ls -al /',
+    distro_deepin = DistroRsync(name = 'deepin',
+                                command_line = DEEPIN_ARGS,
                                 queue = work_queue,
                                 controler = main_controler)
 
-    work_queue.load_items([distro_ubuntu, distro_archlinux])
+    work_queue.load_items([distro_ubuntu, distro_deepin])
     print work_queue.queue
     main_controler.run()
