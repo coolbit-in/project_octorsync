@@ -69,12 +69,11 @@ class DistroRsync(threading.Thread):
         self.controler.busy_num -= 1
 
     def __rsync_process(self):
+        self.log_file.write('>>>>>>>>>>>>>> %s' % time.asctime() + ' >>>>>>>>>>>>\n')
         retcode = subprocess.call(self.args,
                                   stdout = self.log_file,
                                   stderr = self.log_file)
         self.rsynced_times += 1
-        #不起作用，待定
-        #self.log_file.write('>>>>>>>>>>>>>> %s' % time.asctime() + ' >>>>>>>>>>>>\n')
         if retcode == 0:
             return 0
         else:
@@ -88,8 +87,7 @@ class DistroRsync(threading.Thread):
             if self.rsynced_times == MAX_ERROR_TIMES:
                 self.log_file.write("octorsync:Sometime error, %d times\n" 
                                     % MAX_ERROR_TIMES)
-        self.last_rsync_time == time.asctime()
-        #self.receiver.run(self)
+        self.last_rsync_time = time.asctime()
 
     def __sleep(self):
         time.sleep(self.waiting_time)
@@ -145,5 +143,4 @@ if __name__ == '__main__':
 
     work_queue.load_items([distro_ubuntu, distro_deepin, distro_qomo, distro_gentoo])
 
-    #print work_queue.queue
     main_controler.run()
