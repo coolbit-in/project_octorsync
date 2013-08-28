@@ -1,3 +1,4 @@
 .DS*
 logs/*
 logs/
+*.pyc

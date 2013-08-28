@@ -7,16 +7,20 @@ import shlex
 import subprocess
 import threading
 from config_args import *
+from send_mail import *
+
 
 #工作组
 class WorkQueue():
     def __init__(self):
         self.queue = []
 
+    #从列表中载入实例
     def load_items(self, items):
         for item in items:
             self.queue.append(item)
 
+    #封装了一下 len 函数,求队列长度
     def len(self):
         return len(self.queue)
 
@@ -26,6 +30,7 @@ class Controler():
         self.queue = queue
         self.busy_num = 0
 
+    #每3秒在 status.log 中更新同步情况
     def __log(self):
         while True:
             self.log_file = open(os.path.join(LOG_ADDR, 'status.log'), 'w', 0)
@@ -38,10 +43,12 @@ class Controler():
             self.log_file.close()
             time.sleep(3)
 
+    #从工作组中依次运行实例
     def run(self):
         for item in self.queue.queue:
             item.setDaemon(True)
             item.start()
+        #调用 __log 方法实现死循环
         self.__log()
 
 class DistroRsync(threading.Thread):
@@ -50,48 +57,66 @@ class DistroRsync(threading.Thread):
         self.name = name
         self.queue = queue
         self.controler = controler
+        # shlex.split() 的作用是分解命令字符串为列表
         self.args = shlex.split(command_line)
         self.status = 'idle'
+        # last_rsync_time 是最后更新时间戳，无论更新成败
         self.last_rsync_time = time.asctime()
         self.rsynced_times = 0
         self.waiting_time = WAITING_TIME
-        #检测Log路径是否存在
+        #检测Log路径是否存在(存在 bug ，LOG_ADDR 无法实时更新)
         try:
             self.log_file = open(os.path.join(LOG_ADDR, name + '.log'), 'a', 0)
         except IOError:
             os.makedirs(LOG_ADDR)
             self.log_file = open(os.path.join(LOG_ADDR, name + '.log'), 'a', 0)
 
+    #部分变量的重新初始化
     def __re_init(self):
         self.rsynced_times = 0
         self.status = 'idle'
         self.waiting_time = WAITING_TIME
         self.controler.busy_num -= 1
 
+    #单次执行 rsync 的方法
     def __rsync_process(self):
         self.log_file.write('>>>>>>>>>>>>>> %s' % time.asctime() + ' >>>>>>>>>>>>\n')
+        #retcode 是 rsync 进程的退出代码
         retcode = subprocess.call(self.args,
                                   stdout = self.log_file,
                                   stderr = self.log_file)
+        # rsync 实行次数+1
         self.rsynced_times += 1
-        if retcode == 0:
-            return 0
-        else:
-            return 1
+        #若 retcode == 0 则说明 rsync 正确执行
+        return retcode
+        #if retcode == 0:
+        #    return 0
+        #else:
+        #    return 1
 
+    #单次进行同步的过程:
     def __work(self):
         self.status = 'busy'
         while self.rsynced_times < MAX_ERROR_TIMES:
+            #如果单次 rsync 成功，则结束单次同步
             if not self.__rsync_process():
                 break
+            #如果 rsync 失败次数 == MAX_ERROR_TIMES 表明同步失败，发邮件警报
             if self.rsynced_times == MAX_ERROR_TIMES:
-                self.log_file.write("octorsync:Sometime error, %d times\n" 
+                send_mail = SendMail(msg = '%s had %d times rsync errors!\n'
+                                     % (self.name, MAX_ERROR_TIMES))
+                send_mail.send()
+                self.log_file.write('octorsync:Sometime error, %d times\n'
                                     % MAX_ERROR_TIMES)
+        #时间戳，无论成功还是失败
         self.last_rsync_time = time.asctime()
 
+    #休眠过程
     def __sleep(self):
         time.sleep(self.waiting_time)
 
+    #检查可否工作的过程，检查 self.controler.busy_num的值是否小于 MAX_BUSY_NUM
+    #可启动返回0 ,不能启动返回1
     def __check(self):
         if self.controler.busy_num < MAX_BUSY_NUM:
             self.controler.busy_num += 1
@@ -99,11 +124,13 @@ class DistroRsync(threading.Thread):
         else:
             return 1
 
+    #等待过程，当 self.__check 失败后触发，每次触发等待时间减半，但不能小于 MIN_WATING_TIME
     def __wait(self):
         if self.waiting_time > MIN_WAITING_TIME:
             self.waiting_time = self.waiting_time / 2
         self.__sleep()
 
+    #调用 实例的.start()时候，调用run()
     def run(self):
         while True:
             if not self.__check():
