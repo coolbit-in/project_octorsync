@@ -3,7 +3,6 @@
 import os
 import smtplib
 import time
-#from email.message import Message
 from email.mime.text import MIMEText
 from email.header import Header
 

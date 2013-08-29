@@ -1,1 +1,2 @@
 #project_octorsync
+一个集中管理rsync同步的脚本，目前正在开发中

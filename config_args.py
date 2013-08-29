@@ -1,9 +1,11 @@
 # -*-coding:utf=8 -*-
-import time
 import os
+
 #log的根目录
-LOG_ADDR = os.path.join('/srv/log_new', time.strftime('%Y'), time.strftime('%m'),
-                        time.strftime('%d'))
+LOG_ADDR = '/srv/log_new'
+os.makedirs(os.path.join(LOG_ADDR, 'status_log'))
+STATUS_LOG = os.path.join(LOG_ADDR, 'status_log', 'main.log')
+
 #软件源根目录
 MIRROR_ADDR = '/srv/ftp/'
 
