@@ -2,3 +2,6 @@
 logs/*
 logs/
 *.pyc
+.idea/
+.idea/*
+account.txt
