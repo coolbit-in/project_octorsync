@@ -3,7 +3,11 @@ import os
 
 #log的根目录
 LOG_ADDR = '/srv/log_new'
-os.makedirs(os.path.join(LOG_ADDR, 'status_log'))
+try:
+    os.makedirs(os.path.join(LOG_ADDR, 'status_log'))
+except OSError:
+    pass
+
 STATUS_LOG = os.path.join(LOG_ADDR, 'status_log', 'main.log')
 
 #软件源根目录

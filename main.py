@@ -72,10 +72,10 @@ class DistroRsync(threading.Thread):
         date_log_path = os.path.join(LOG_ADDR, time.strftime('%Y'), time.strftime('%m'),
                                      time.strftime('%d'))
         try:
-            self.log_file = open(os.path.join(date_log_path, name + '.log'), 'a', 0)
+            self.log_file = open(os.path.join(date_log_path, self.name + '.log'), 'a', 0)
         except IOError:
             os.makedirs(date_log_path)
-            self.log_file = open(os.path.join(date_log_path, name + '.log'), 'a', 0)
+            self.log_file = open(os.path.join(date_log_path, self.name + '.log'), 'a', 0)
 
 
     #部分变量的重新初始化
@@ -106,7 +106,7 @@ class DistroRsync(threading.Thread):
         while self.rsynced_times < MAX_ERROR_TIMES:
             #如果单次 rsync 成功，则结束单次同步
             retcode = self.__rsync_process()
-            if not retcode ():
+            if not retcode:
                 self.status_log.info(self.name, 'Rsync successfully')
                 break
             #如果 rsync 失败次数 == MAX_ERROR_TIMES 表明同步失败，发邮件警报
