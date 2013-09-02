@@ -113,9 +113,10 @@ class DistroRsync(threading.Thread):
             self.status_log.warn(self.name, 'Rsync failed, the exit code: %d' % retcode)
 
             if self.rsynced_times == MAX_ERROR_TIMES:
-                send_mail = SendMail(msg = '%s had %d times rsync errors!\n'
-                                     % (self.name, MAX_ERROR_TIMES))
-                send_mail.send()
+				#邮件服务下线，正在调试
+                #send_mail = SendMail(msg = '%s had %d times rsync errors!\n'
+                #                     % (self.name, MAX_ERROR_TIMES))
+                #send_mail.send()
 
                 self.log_file.write('octorsync:Sometime error, %d times\n'
                                     % MAX_ERROR_TIMES)

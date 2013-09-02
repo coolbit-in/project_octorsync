@@ -18,7 +18,7 @@ class SendMail():
         self.msg  = msg
 
     def send(self):
-        if msg == '':
+        if self.msg == '':
             message = MIMEText(self.text_file.read(), 'plain', 'utf-8')
             message['Subject'] = Header('Warning! Form linux.xidian.edu.cn')
             message_string = message.as_string()
@@ -34,6 +34,6 @@ class SendMail():
         smtp_con.quit()
 
 if __name__ == '__main__':
-    test_mail = SendMail()
+    test_mail = SendMail('test by coolbit')
     test_mail.send()
 
