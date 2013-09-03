@@ -3,12 +3,8 @@ import os
 
 #log的根目录
 LOG_ADDR = '/srv/log_new'
-try:
-    os.makedirs(os.path.join(LOG_ADDR, 'status_log'))
-except OSError:
-    pass
-
-STATUS_LOG = os.path.join(LOG_ADDR, 'status_log', 'main.log')
+STATUS_LOG = os.path.join(LOG_ADDR, 'status_log')
+STATUS_LOG_FILE = os.path.join(STATUS_LOG, 'main.log')
 
 #软件源根目录
 MIRROR_ADDR = '/srv/ftp/'

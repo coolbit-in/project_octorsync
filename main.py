@@ -71,11 +71,11 @@ class DistroRsync(threading.Thread):
     def __set_date_log(self):
         date_log_path = os.path.join(LOG_ADDR, time.strftime('%Y'), time.strftime('%m'),
                                      time.strftime('%d'))
-        try:
-            self.log_file = open(os.path.join(date_log_path, self.name + '.log'), 'a', 0)
-        except IOError:
+        if not os.path.exists(date_log_path):
             os.makedirs(date_log_path)
-            self.log_file = open(os.path.join(date_log_path, self.name + '.log'), 'a', 0)
+        self.log_file = open(os.path.join(date_log_path, self.name + '.log'), 'a', 0)
+
+
 
 
     #部分变量的重新初始化
@@ -113,7 +113,7 @@ class DistroRsync(threading.Thread):
             self.status_log.warn(self.name, 'Rsync failed, the exit code: %d' % retcode)
 
             if self.rsynced_times == MAX_ERROR_TIMES:
-				#邮件服务下线，正在调试
+                #邮件服务下线，正在调试
                 #send_mail = SendMail(msg = '%s had %d times rsync errors!\n'
                 #                     % (self.name, MAX_ERROR_TIMES))
                 #send_mail.send()
