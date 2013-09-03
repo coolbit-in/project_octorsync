@@ -16,7 +16,7 @@ MAX_ERROR_TIMES = 5
 WAITING_TIME = 60*60
 
 #并行上限
-MAX_BUSY_NUM = 3
+MAX_BUSY_NUM = 4
 
 #最小等待间隔(s)
 MIN_WAITING_TIME = 30
@@ -53,3 +53,15 @@ QOMO_ARGS   = 'rsync -6 -av --delete-after --ignore-errors --timeout=3600 --forc
               + ' --exclude *.iso*' \
               + ' rsync://mirrors6.ustc.edu.cn/qomo' \
               + ' ' + MIRROR_ADDR + 'qomo'
+
+LINUXMINT_ARGS = 'rsync -6 -av --delete-after --ignore-errors --timeout=3600 --force -h' \
+              + ' --exclude *.iso' \
+              + ' --exclude *.iso*' \
+              + ' --exclude *.~tmp~*' \
+              + ' rsync://mirrors6.ustc.edu.cn/linuxmint' \
+              + ' ' + MIRROR_ADDR + 'linuxmint'
+
+OPENSUSE_ARGS = 'rsync -6 -av --delete-after --ignore-errors --timeout=3600 --force -h' \
+              + ' rsync://mirrors6.ustc.edu.cn/opensuse' \
+              + ' --exclude *.iso' \
+              + ' ' + MIRROR_ADDR + 'opensuse'
