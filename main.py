@@ -190,6 +190,18 @@ if __name__ == '__main__':
                                 controler = main_controler,
                                 status_log = status_log)
 
-    work_queue.load_items([distro_ubuntu, distro_deepin, distro_qomo, distro_gentoo])
+    distro_linuxmint = DistroRsync(name = 'linuxmint',
+                                command_line = LINUXMINT_ARGS,
+                                queue = work_queue,
+                                controler = main_controler,
+                                status_log = status_log)
+
+    distro_opensuse = DistroRsync(name = 'opensuse',
+                                command_line = OPENSUSE_ARGS,
+                                queue = work_queue,
+                                controler = main_controler,
+                                status_log = status_log)
+
+    work_queue.load_items([distro_ubuntu, distro_deepin, distro_qomo, distro_gentoo, distro_linuxmint, distro_opensuse])
 
     main_controler.run()
