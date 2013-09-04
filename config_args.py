@@ -13,7 +13,7 @@ MIRROR_ADDR = '/srv/ftp/'
 MAX_ERROR_TIMES = 5
 
 #等待间隔(s)
-WAITING_TIME = 60*60
+WAITING_TIME = 60*60*2
 
 #并行上限
 MAX_BUSY_NUM = 4
