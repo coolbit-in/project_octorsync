@@ -1,0 +1,15 @@
+*ia64*
+*powerpc*
+*sparc*
+*dapper*
+*hardy*
+*intrepid*
+*jaunty*
+*karmic*
+*maverick*
+*natty*
+*oneiric*
+*.iso
+*.orig.tar.gz
+*.diff.gz
+*.dsc
