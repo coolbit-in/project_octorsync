@@ -66,4 +66,14 @@ OPENSUSE_ARGS = 'rsync -6 -av --delete-after --ignore-errors --timeout=3600 --fo
               + ' --exclude *.iso' \
               + ' ' + MIRROR_ADDR + 'opensuse'
 
-
+ARCHLINUX_ARGS = 'rsync -6 -av --delete-after --ignore-errors --timeout=3600 --force -h' \
+              + ' rsync://mirrors6.ustc.edu.cn/archlinux' \
+              + ' --exclude community-staging/'\
+              + ' --exclude community-testing/' \
+              + ' --exclude gnome-unstable/' \
+              + ' --exclude kde-unstable/' \
+              + ' --exclude multilib-staging/' \
+              + ' --exclude multilib-testing/' \
+              + ' --exclude staging/' \
+              + ' --exclude testing/' \
+              + ' ' + MIRROR_ADDR + 'archlinux'

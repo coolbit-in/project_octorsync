@@ -199,13 +199,13 @@ if __name__ == '__main__':
                                 queue = work_queue,
                                 controler = main_controler,
                                 status_log = status_log)
-    """
-    distro_opensuse = DistroRsync(name = 'opensuse',
-                                command_line = OPENSUSE_ARGS,
+
+    distro_archlinux = DistroRsync(name = 'archlinux',
+                                command_line = ARCHLINUX_ARGS,
                                 queue = work_queue,
                                 controler = main_controler,
                                 status_log = status_log)
-    """
-    work_queue.load_items([distro_ubuntu, distro_deepin, distro_qomo, distro_gentoo, distro_linuxmint])
+
+    work_queue.load_items([distro_ubuntu, distro_deepin, distro_qomo, distro_gentoo, distro_linuxmint,distro_archlinux])
 
     main_controler.run()
