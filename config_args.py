@@ -65,3 +65,5 @@ OPENSUSE_ARGS = 'rsync -6 -av --delete-after --ignore-errors --timeout=3600 --fo
               + ' rsync://mirrors6.ustc.edu.cn/opensuse' \
               + ' --exclude *.iso' \
               + ' ' + MIRROR_ADDR + 'opensuse'
+
+
