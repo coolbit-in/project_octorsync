@@ -6,10 +6,10 @@ import time
 import shlex
 import subprocess
 import threading
-from config_args import *
+#from config_args import *
 from send_mail import *
 from make_log import *
-
+from parse_config import *
 
 #工作组
 class WorkQueue():
@@ -17,8 +17,7 @@ class WorkQueue():
         self.queue = []
 
     #从列表中载入实例
-    def load_items(self, items):
-        for item in items:
+    def load_item(self, item):
             self.queue.append(item)
 
     #封装了一下 len 函数,求队列长度
@@ -34,7 +33,7 @@ class Controler():
     #每3秒在 status.log 中更新同步情况
     def __log(self):
         while True:
-            self.log_file = open(os.path.join(LOG_ADDR, 'status.log'), 'w', 0)
+            self.log_file = open(STATUS_LOG_ADDR, 'w', 0)
             sys.stdout = self.log_file
             print time.asctime()
             print 'Busy:%d' % self.busy_num + '   ' + 'Idle:%d' % \
@@ -53,7 +52,7 @@ class Controler():
         self.__log()
 
 class DistroRsync(threading.Thread):
-    def __init__(self, name, command_line, queue, controler, status_log):
+    def __init__(self, name, command_line, queue, controler, server_log):
         threading.Thread.__init__(self)
         self.name = name
         self.queue = queue
@@ -66,10 +65,10 @@ class DistroRsync(threading.Thread):
         self.rsynced_times = 0
         self.waiting_time = WAITING_TIME
         self.log_file = ''
-        self.status_log = status_log
+        self.server_log = server_log
 
     def __set_date_log(self):
-        date_log_path = os.path.join(LOG_ADDR, time.strftime('%Y'), time.strftime('%m'),
+        date_log_path = os.path.join(LOG_ROOT, time.strftime('%Y'), time.strftime('%m'),
                                      time.strftime('%d'))
         if not os.path.exists(date_log_path):
             os.makedirs(date_log_path)
@@ -80,7 +79,7 @@ class DistroRsync(threading.Thread):
 
     #部分变量的重新初始化
     def __re_init(self):
-        self.status_log.info(self.name, 'Set status: idle')
+        self.server_log.info(self.name, 'Set status: idle')
         self.rsynced_times = 0
         self.status = 'idle'
         self.waiting_time = WAITING_TIME
@@ -102,15 +101,15 @@ class DistroRsync(threading.Thread):
     #单次进行同步的过程:
     def __work(self):
         self.status = 'busy'
-        self.status_log.info(self.name, 'Begin to synchronize. Set status: busy')
+        self.server_log.info(self.name, 'Begin to synchronize. Set status: busy')
         while self.rsynced_times < MAX_ERROR_TIMES:
             #如果单次 rsync 成功，则结束单次同步
             retcode = self.__rsync_process()
             if not retcode:
-                self.status_log.info(self.name, 'Rsync successfully')
+                self.server_log.info(self.name, 'Rsync successfully')
                 break
             #如果 rsync 失败次数 == MAX_ERROR_TIMES 表明同步失败，发邮件警报
-            self.status_log.warn(self.name, 'Rsync failed, the exit code: %d' % retcode)
+            self.server_log.warn(self.name, 'Rsync failed, the exit code: %d' % retcode)
 
             if self.rsynced_times == MAX_ERROR_TIMES:
                 #邮件服务下线，正在调试
@@ -121,7 +120,7 @@ class DistroRsync(threading.Thread):
                 self.log_file.write('octorsync:Sometime error, %d times\n'
                                     % MAX_ERROR_TIMES)
 
-                self.status_log.error(self.name, 'Rsync error %d times, STOP to synchronize'
+                self.server_log.error(self.name, 'Rsync error %d times, STOP to synchronize'
                                       % MAX_ERROR_TIMES)
 
         #时间戳，无论成功还是失败
@@ -164,44 +163,28 @@ if __name__ == '__main__':
     pid_log.close()
     work_queue = WorkQueue()
     main_controler = Controler(queue = work_queue)
-    status_log = ServerLog()
+    server_log = ServerLog()
 
-    distro_ubuntu = DistroRsync(name = 'ubuntu',
-                                command_line = UBUNTU_ARGS,
-                                queue = work_queue,
-                                controler = main_controler,
-                                status_log = status_log)
-
-    distro_deepin = DistroRsync(name = 'deepin',
-                                command_line = DEEPIN_ARGS,
-                                queue = work_queue,
-                                controler = main_controler,
-                                status_log = status_log)
-
-    distro_qomo = DistroRsync(name = 'qomo',
-                                command_line = QOMO_ARGS,
-                                queue = work_queue,
-                                controler = main_controler,
-                                status_log = status_log)
-
-    distro_gentoo = DistroRsync(name = 'gentoo',
-                                command_line = GENTOO_ARGS,
-                                queue = work_queue,
-                                controler = main_controler,
-                                status_log = status_log)
-
-    distro_linuxmint = DistroRsync(name = 'linuxmint',
-                                command_line = LINUXMINT_ARGS,
-                                queue = work_queue,
-                                controler = main_controler,
-                                status_log = status_log)
-
+    for distro_name in distro_args.keys():
+        temp_distro = distro_args[distro_name]
+        distro_command_line = RSYNC_BASE_6 \
+                              + ' --exclude-from' \
+                              + ' ' + os.path.join(os.getcwd(),
+                                                   temp_distro['exclude_file']) \
+                              + ' ' + temp_distro['rsync_server'] \
+                              + ' ' + os.path.join(MIRROR_ROOT, temp_distro['mirror_addr'])
+        work_queue.load_item(DistroRsync(name = distro_name,
+                                         command_line = distro_command_line,
+                                         queue = work_queue,
+                                         controler = main_controler,
+                                         server_log = server_log))
+'''
     distro_opensuse = DistroRsync(name = 'opensuse',
                                 command_line = OPENSUSE_ARGS,
                                 queue = work_queue,
                                 controler = main_controler,
-                                status_log = status_log)
+                                server_log = server_log)
 
     work_queue.load_items([distro_ubuntu, distro_deepin, distro_qomo, distro_gentoo, distro_linuxmint, distro_opensuse])
-
+'''
     main_controler.run()
