@@ -16,9 +16,9 @@ MAIN_LOG_ADDR = global_args['main_log_addr']
 
 MAX_ERROR_TIMES = int(global_args['max_error_times'])
 
-WAITINT_TIME = int(global_args['waiting_time'])
+WAITING_TIME = int(global_args['waiting_time'])
 
-MIN_WAITNG_TIME = int(global_args['min_waiting_time'])
+MIN_WAITING_TIME = int(global_args['min_waiting_time'])
 
 MAX_BUSY_NUM = int(global_args['max_busy_num'])
 

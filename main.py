@@ -71,7 +71,12 @@ class DistroRsync(threading.Thread):
         date_log_path = os.path.join(LOG_ROOT, time.strftime('%Y'), time.strftime('%m'),
                                      time.strftime('%d'))
         if not os.path.exists(date_log_path):
-            os.makedirs(date_log_path)
+            try:
+                os.makedirs(date_log_path)
+            except OSError:
+                #由于并发，这里必须要排除其他线程已经建好目录的情况
+                pass
+
         self.log_file = open(os.path.join(date_log_path, self.name + '.log'), 'a', 0)
 
 
@@ -175,16 +180,8 @@ if __name__ == '__main__':
                               + ' ' + os.path.join(MIRROR_ROOT, temp_distro['mirror_addr'])
         work_queue.load_item(DistroRsync(name = distro_name,
                                          command_line = distro_command_line,
+                                         #command_line = 'uname -a',
                                          queue = work_queue,
                                          controler = main_controler,
                                          server_log = server_log))
-'''
-    distro_opensuse = DistroRsync(name = 'opensuse',
-                                command_line = OPENSUSE_ARGS,
-                                queue = work_queue,
-                                controler = main_controler,
-                                server_log = server_log)
-
-    work_queue.load_items([distro_ubuntu, distro_deepin, distro_qomo, distro_gentoo, distro_linuxmint, distro_opensuse])
-'''
     main_controler.run()

@@ -1,10 +1,12 @@
 import logging
+import os
 #from config_args import *
 from parse_config import *
+
 class ServerLog():
     def __init__(self):
         if not os.path.exists(LOG_ROOT):
-            os.makedirs()
+            os.makedirs(LOG_ROOT)
         self.main_log = logging.getLogger()
         self.main_log.setLevel(logging.DEBUG)
 
