@@ -39,7 +39,7 @@ class Controler():
             print 'Busy:%d' % self.busy_num + '   ' + 'Idle:%d' % \
                    (self.queue.len() - self.busy_num)
             for item in self.queue.queue:
-                print item.name + '   ' + item.status + '   ' + item.last_rsync_time
+                print item.name + '   ' + item.status + '   ' + item.last_rsync_time + '   ' + item.last_rsync_status
             self.log_file.close()
             time.sleep(3)
 
@@ -62,6 +62,8 @@ class DistroRsync(threading.Thread):
         self.status = 'idle'
         # last_rsync_time 是最后更新时间戳，无论更新成败
         self.last_rsync_time = time.asctime()
+        # last_rsync_status 是最后一次更新的结果,success/fail
+        self.last_rsync_status = 'fail'
         self.rsynced_times = 0
         self.waiting_time = WAITING_TIME
         self.log_file = ''
@@ -112,6 +114,7 @@ class DistroRsync(threading.Thread):
             retcode = self.__rsync_process()
             if not retcode:
                 self.server_log.info(self.name, 'Rsync successfully')
+                self.last_rsync_status = 'success'
                 break
             #如果 rsync 失败次数 == MAX_ERROR_TIMES 表明同步失败，发邮件警报
             self.server_log.warn(self.name, 'Rsync failed, the exit code: %d' % retcode)
@@ -127,6 +130,7 @@ class DistroRsync(threading.Thread):
 
                 self.server_log.error(self.name, 'Rsync error %d times, STOP to synchronize'
                                       % MAX_ERROR_TIMES)
+                self.last_rsync_status = 'fail'
 
         #时间戳，无论成功还是失败
         self.last_rsync_time = time.asctime()
@@ -180,7 +184,7 @@ if __name__ == '__main__':
                               + ' ' + os.path.join(MIRROR_ROOT, temp_distro['mirror_addr'])
         work_queue.load_item(DistroRsync(name = distro_name,
                                          command_line = distro_command_line,
-                                         #command_line = 'uname -a',
+                                       # command_line = 'uname -a',
                                          queue = work_queue,
                                          controler = main_controler,
                                          server_log = server_log))
