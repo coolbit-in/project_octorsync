@@ -1,0 +1,5 @@
+*.iso
+*.iso*
+factory/
+factory-tested/
+

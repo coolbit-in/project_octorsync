@@ -1,13 +1,16 @@
 import logging
-from config_args import *
+import os
+#from config_args import *
+from parse_config import *
+
 class ServerLog():
     def __init__(self):
-        if not os.path.exists(STATUS_LOG):
-            os.makedirs(STATUS_LOG)
+        if not os.path.exists(LOG_ROOT):
+            os.makedirs(LOG_ROOT)
         self.main_log = logging.getLogger()
         self.main_log.setLevel(logging.DEBUG)
 
-        self.log_file = logging.FileHandler(STATUS_LOG_FILE)
+        self.log_file = logging.FileHandler(MAIN_LOG_ADDR)
         self.log_file.setLevel(logging.DEBUG)
 
         self.formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
