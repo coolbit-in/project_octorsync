@@ -1,0 +1,9 @@
+community-staging/
+community-testing/
+gnome-unstable/
+kde-unstable/
+multilib-staging/
+multilib-testing/
+staging/
+testing/
+
