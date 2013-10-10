@@ -6,9 +6,11 @@ import time
 import shlex
 import subprocess
 import threading
+i
 #from config_args import *
 from send_mail import *
 from make_log import *
+from make_database import *
 from parse_config import *
 
 #工作组
@@ -52,7 +54,7 @@ class Controler():
         self.__log()
 
 class DistroRsync(threading.Thread):
-    def __init__(self, name, command_line, queue, controler, server_log):
+    def __init__(self, name, command_line, queue, controler, server_log, server_database):
         threading.Thread.__init__(self)
         self.name = name
         self.queue = queue
@@ -68,6 +70,7 @@ class DistroRsync(threading.Thread):
         self.waiting_time = WAITING_TIME
         self.log_file = ''
         self.server_log = server_log
+        self.server_database = server_database
 
     def __set_date_log(self):
         date_log_path = os.path.join(LOG_ROOT, time.strftime('%Y'), time.strftime('%m'),
@@ -95,7 +98,7 @@ class DistroRsync(threading.Thread):
 
     #单次执行 rsync 的方法
     def __rsync_process(self):
-        self.log_file.write('>>>>>>>>>>>>>> %s' % time.asctime() + ' >>>>>>>>>>>>\n')
+        self.log_file.write('>>>>>>>>>>>>>>> %s' % time.asctime() + ' >>>>>>>>>>>>>>\n')
         #retcode 是 rsync 进程的退出代码
         retcode = subprocess.call(self.args,
                                   stdout = self.log_file,
@@ -173,6 +176,7 @@ if __name__ == '__main__':
     work_queue = WorkQueue()
     main_controler = Controler(queue = work_queue)
     server_log = ServerLog()
+    server_database = StatusDatabase()
 
     for distro_name in distro_args.keys():
         temp_distro = distro_args[distro_name]
@@ -187,5 +191,6 @@ if __name__ == '__main__':
                                        #  command_line = 'uname -a',
                                          queue = work_queue,
                                          controler = main_controler,
-                                         server_log = server_log))
+                                         server_log = server_log,
+                                         server_database = server_database))
     main_controler.run()
