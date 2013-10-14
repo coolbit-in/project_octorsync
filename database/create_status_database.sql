@@ -1,5 +1,7 @@
-create table octorsync_status (
-    distro_name     text primary key not null,
-    lasy_rsync_time date,
-    rsync_status    text
-);
+CREATE TABLE "octorsync_status" (
+    "id" integer NOT NULL PRIMARY KEY,
+    "distro_name" text NOT NULL UNIQUE,
+    "last_rsync_time" text,
+    "rsync_status" text NOT NULL
+)
+;

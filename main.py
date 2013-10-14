@@ -6,7 +6,6 @@ import time
 import shlex
 import subprocess
 import threading
-i
 #from config_args import *
 from send_mail import *
 from make_log import *
@@ -66,11 +65,13 @@ class DistroRsync(threading.Thread):
         self.last_rsync_time = time.asctime()
         # last_rsync_status 是最后一次更新的结果,success/fail
         self.last_rsync_status = 'fail'
+        # 在数据库中创建信息
+        self.server_database = server_database
+        self.server_database.insert_distro(self.name, self.last_rsync_time, self.last_rsync_status)
         self.rsynced_times = 0
         self.waiting_time = WAITING_TIME
         self.log_file = ''
         self.server_log = server_log
-        self.server_database = server_database
 
     def __set_date_log(self):
         date_log_path = os.path.join(LOG_ROOT, time.strftime('%Y'), time.strftime('%m'),
@@ -111,6 +112,7 @@ class DistroRsync(threading.Thread):
     #单次进行同步的过程:
     def __work(self):
         self.status = 'busy'
+        self.server_database.update_status(self.name, self.status)
         self.server_log.info(self.name, 'Begin to synchronize. Set status: busy')
         while self.rsynced_times < MAX_ERROR_TIMES:
             #如果单次 rsync 成功，则结束单次同步
@@ -118,6 +120,7 @@ class DistroRsync(threading.Thread):
             if not retcode:
                 self.server_log.info(self.name, 'Rsync successfully')
                 self.last_rsync_status = 'success'
+                self.server_database.update_status(self.name, self.last_rsync_status)
                 break
             #如果 rsync 失败次数 == MAX_ERROR_TIMES 表明同步失败，发邮件警报
             self.server_log.warn(self.name, 'Rsync failed, the exit code: %d' % retcode)
@@ -134,9 +137,11 @@ class DistroRsync(threading.Thread):
                 self.server_log.error(self.name, 'Rsync error %d times, STOP to synchronize'
                                       % MAX_ERROR_TIMES)
                 self.last_rsync_status = 'fail'
+                self.server_database.update_status(self.name, self.last_rsync_status)
 
         #时间戳，无论成功还是失败
         self.last_rsync_time = time.asctime()
+        self.server_database.update_last_rsync_time(self.name, self.last_rsync_time)
 
     #休眠过程
     def __sleep(self):
@@ -187,8 +192,8 @@ if __name__ == '__main__':
                               + ' ' + temp_distro['rsync_server'] \
                               + ' ' + os.path.join(MIRROR_ROOT, temp_distro['mirror_addr'])
         work_queue.load_item(DistroRsync(name = distro_name,
-                                         command_line = distro_command_line,
-                                       #  command_line = 'uname -a',
+                                       #  command_line = distro_command_line,
+                                         command_line = 'uname -a',
                                          queue = work_queue,
                                          controler = main_controler,
                                          server_log = server_log,
