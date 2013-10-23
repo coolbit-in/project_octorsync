@@ -1,4 +1,4 @@
-# -*- coding:utf=8 -*-
+# -*- coding:utf-8 -*-
 import ConfigParser
 
 config_file_parser = ConfigParser.SafeConfigParser()

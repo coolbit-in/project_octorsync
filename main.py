@@ -1,13 +1,11 @@
 #!/usr/bin/python
-# -*-coding:utf=8 -*-
+# -*- coding:utf-8 -*-
 import os
 import sys
 import time
 import shlex
 import subprocess
 import threading
-#from config_args import *
-from send_mail import *
 from make_log import *
 from make_database import *
 from parse_config import *

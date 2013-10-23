@@ -1,8 +1,8 @@
 #OctoRsync
 OctoRsync 是运行在[西电开源社区服务器](http://linux.xidian.edu.cn)上的软件源同步程序，相比于原有的 shell script + crontab 方式，OctoRsync 通过统一的调度管理，使软件源能够在恶劣的网络环境中**提高同步的成功率**。另外，原有的crontab设定了较长的同步间隔，使得一些更新量比较大的软件源，不得不一次同步非常长的时间，也增加了同步失败的概率。OctoRsync 可以自由设置同步间隔，默认为上次同步结束后120分钟再次请求同步，这样每天基本能同步5-6次。OctoRsync 还设置了并发限制，以防止平均带宽的减少导致同步失败。
 
-##OctoResync 配置文件说明
-OctoResync 的配置文件是 `config.ini`，使用`.ini`是因为 python 的`ConfigParser`模块可以直接解析，省的自己搞解析器了。
+##OctoRsync 配置文件说明
+OctoRsync 的配置文件是 `config.ini`，使用`.ini`是因为 python 的`ConfigParser`模块可以直接解析，省的自己搞解析器了。
 我尽可能的把配置文件搞得**简单易懂**，下面是添加一个软件源的语句块样例：
 ```
 ;发行版样例

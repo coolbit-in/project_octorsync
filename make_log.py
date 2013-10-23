@@ -1,7 +1,7 @@
+# -*- coding:utf-8 -*-
 import logging
 import os
-#from config_args import *
-from parse_config import *
+from parse_config import LOG_ROOT, MAIN_LOG_ADDR
 
 class ServerLog():
     def __init__(self):
