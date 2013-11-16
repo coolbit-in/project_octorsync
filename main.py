@@ -74,7 +74,7 @@ class DistroRsync(threading.Thread):
         self.args = shlex.split(command_line)
         self.status = 'idle'
         # last_rsync_time 是最后更新时间戳，无论更新成败
-        self.last_rsync_time = time.asctime()
+        self.last_rsync_time = time.strftime('%Y-%m-%d %H:%M:%S')
         # last_rsync_status 是最后一次更新的结果,success/fail
         self.last_rsync_status = 'fail'
         # size 是发行版的文件容量
@@ -137,6 +137,7 @@ class DistroRsync(threading.Thread):
             if not retcode:
                 self.server_log.info(self.name, 'Rsync successfully')
                 self.last_rsync_status = 'success'
+                self.last_rsync_time = time.strftime('%Y-%m-%d %H:%M:%S')
         #        self.server_database.update_status(self.name, self.last_rsync_status)
                 break
             #如果 rsync 失败次数 == MAX_ERROR_TIMES 表明同步失败，发邮件警报
@@ -156,8 +157,6 @@ class DistroRsync(threading.Thread):
                 self.last_rsync_status = 'fail'
         #        self.server_database.update_status(self.name, self.last_rsync_status)
 
-        #时间戳，无论成功还是失败
-        self.last_rsync_time = time.asctime()
         #self.server_database.update_last_rsync_time(self.name, self.last_rsync_time)
 
     #休眠过程
