@@ -9,6 +9,7 @@ import threading
 from make_log import *
 #from make_database import *
 from parse_config import *
+from catch_info import catch_info
 
 #工作组
 class WorkQueue():
@@ -35,14 +36,23 @@ class Controler():
             self.log_file = open(STATUS_LOG_ADDR, 'w', 0)
             sys.stdout = self.log_file
             print time.asctime()
-            print 'Busy:{busy_num:<10d}  Idle:{idle_num:<10d}'.format(busy_num=self.busy_num, idle_num=(self.queue.len() - self.busy_num))
-            #print 'Busy:%d' % self.busy_num + '   ' + 'Idle:%d' % \
-            #       (self.queue.len() - self.busy_num)
-            status_file_template = '{name:<20} {status:<10} {last_rsync_time:<30} {last_rsync_status:<10}'
-            print status_file_template.format(name='name', status='status', last_rsync_time='last_rsync_time', last_rsync_status='last_st')
+            print 'Busy:{busy_num:<10d}  Idle:{idle_num:<10d}'.format(busy_num=self.busy_num,
+                                                                      idle_num=(self.queue.len() - self.busy_num))
+
+            status_file_template = '{name:<20} {status:<10} {last_rsync_time:<30} {last_rsync_status:<10} {size:<15}'
+
+            print status_file_template.format(name='name',
+                                              status='status',
+                                              last_rsync_time='last_rsync_time',
+                                              last_rsync_status='last_st',
+                                              size='size')
             for item in self.queue.queue:
-                #print item.name + '   ' + item.status + '   ' + item.last_rsync_time + '   ' + item.last_rsync_status
-                print status_file_template.format(name=item.name, status=item.status, last_rsync_time=item.last_rsync_time, last_rsync_status=item.last_rsync_status)
+                print status_file_template.format(name=item.name,
+                                                  status=item.status,
+                                                  last_rsync_time=item.last_rsync_time,
+                                                  last_rsync_status=item.last_rsync_status,
+                                                  size=item.size)
+
             self.log_file.close()
             time.sleep(3)
 
@@ -67,6 +77,8 @@ class DistroRsync(threading.Thread):
         self.last_rsync_time = time.asctime()
         # last_rsync_status 是最后一次更新的结果,success/fail
         self.last_rsync_status = 'fail'
+        # size 是发行版的文件容量
+        self.size = '0G'
         # 在数据库中创建信息。20131116 废弃数据库
         #self.server_database = server_database
         #self.server_database.insert_distro(self.name, self.last_rsync_time, self.last_rsync_status)
@@ -98,7 +110,10 @@ class DistroRsync(threading.Thread):
         self.waiting_time = WAITING_TIME
         self.controler.busy_num -= 1
         self.log_file.close()
-
+        if self.last_rsync_status == 'success':
+            size = catch_info(self.log_file.name)
+            if not size is None:
+               size = self.size
     #单次执行 rsync 的方法
     def __rsync_process(self):
         self.log_file.write('>>>>>>>>>>>>>>> %s' % time.asctime() + ' >>>>>>>>>>>>>>\n')
