@@ -7,7 +7,7 @@ import shlex
 import subprocess
 import threading
 from make_log import *
-from make_database import *
+#from make_database import *
 from parse_config import *
 
 #工作组
@@ -30,15 +30,19 @@ class Controler():
         self.busy_num = 0
 
     #每3秒在 status.log 中更新同步情况
-    def __log(self):
+    def __refresh_status(self):
         while True:
             self.log_file = open(STATUS_LOG_ADDR, 'w', 0)
             sys.stdout = self.log_file
             print time.asctime()
-            print 'Busy:%d' % self.busy_num + '   ' + 'Idle:%d' % \
-                   (self.queue.len() - self.busy_num)
+            print 'Busy:{busy_num:<10d}  Idle:{idle_num:<10d}'.format(busy_num=self.busy_num, idle_num=(self.queue.len() - self.busy_num))
+            #print 'Busy:%d' % self.busy_num + '   ' + 'Idle:%d' % \
+            #       (self.queue.len() - self.busy_num)
+            status_file_template = '{name:<20} {status:<10} {last_rsync_time:<30} {last_rsync_status:<10}'
+            print status_file_template.format(name='name', status='status', last_rsync_time='last_rsync_time', last_rsync_status='last_st')
             for item in self.queue.queue:
-                print item.name + '   ' + item.status + '   ' + item.last_rsync_time + '   ' + item.last_rsync_status
+                #print item.name + '   ' + item.status + '   ' + item.last_rsync_time + '   ' + item.last_rsync_status
+                print status_file_template.format(name=item.name, status=item.status, last_rsync_time=item.last_rsync_time, last_rsync_status=item.last_rsync_status)
             self.log_file.close()
             time.sleep(3)
 
@@ -47,11 +51,11 @@ class Controler():
         for item in self.queue.queue:
             item.setDaemon(True)
             item.start()
-        #调用 __log 方法实现死循环
-        self.__log()
+        #调用 __refresh_status() 方法实现死循环
+        self.__refresh_status()
 
 class DistroRsync(threading.Thread):
-    def __init__(self, name, command_line, queue, controler, server_log, server_database):
+    def __init__(self, name, command_line, queue, controler, server_log):
         threading.Thread.__init__(self)
         self.name = name
         self.queue = queue
@@ -63,9 +67,9 @@ class DistroRsync(threading.Thread):
         self.last_rsync_time = time.asctime()
         # last_rsync_status 是最后一次更新的结果,success/fail
         self.last_rsync_status = 'fail'
-        # 在数据库中创建信息
-        self.server_database = server_database
-        self.server_database.insert_distro(self.name, self.last_rsync_time, self.last_rsync_status)
+        # 在数据库中创建信息。20131116 废弃数据库
+        #self.server_database = server_database
+        #self.server_database.insert_distro(self.name, self.last_rsync_time, self.last_rsync_status)
         self.rsynced_times = 0
         self.waiting_time = WAITING_TIME
         self.log_file = ''
@@ -110,7 +114,7 @@ class DistroRsync(threading.Thread):
     #单次进行同步的过程:
     def __work(self):
         self.status = 'busy'
-        self.server_database.update_status(self.name, self.status)
+        #self.server_database.update_status(self.name, self.status)
         self.server_log.info(self.name, 'Begin to synchronize. Set status: busy')
         while self.rsynced_times < MAX_ERROR_TIMES:
             #如果单次 rsync 成功，则结束单次同步
@@ -118,7 +122,7 @@ class DistroRsync(threading.Thread):
             if not retcode:
                 self.server_log.info(self.name, 'Rsync successfully')
                 self.last_rsync_status = 'success'
-                self.server_database.update_status(self.name, self.last_rsync_status)
+        #        self.server_database.update_status(self.name, self.last_rsync_status)
                 break
             #如果 rsync 失败次数 == MAX_ERROR_TIMES 表明同步失败，发邮件警报
             self.server_log.warn(self.name, 'Rsync failed, the exit code: %d' % retcode)
@@ -135,11 +139,11 @@ class DistroRsync(threading.Thread):
                 self.server_log.error(self.name, 'Rsync error %d times, STOP to synchronize'
                                       % MAX_ERROR_TIMES)
                 self.last_rsync_status = 'fail'
-                self.server_database.update_status(self.name, self.last_rsync_status)
+        #        self.server_database.update_status(self.name, self.last_rsync_status)
 
         #时间戳，无论成功还是失败
         self.last_rsync_time = time.asctime()
-        self.server_database.update_last_rsync_time(self.name, self.last_rsync_time)
+        #self.server_database.update_last_rsync_time(self.name, self.last_rsync_time)
 
     #休眠过程
     def __sleep(self):
@@ -179,7 +183,7 @@ if __name__ == '__main__':
     work_queue = WorkQueue()
     main_controler = Controler(queue = work_queue)
     server_log = ServerLog()
-    server_database = StatusDatabase()
+    #server_database = StatusDatabase()
 
     for distro_name in distro_args.keys():
         temp_distro = distro_args[distro_name]
@@ -190,10 +194,10 @@ if __name__ == '__main__':
                               + ' ' + temp_distro['rsync_server'] \
                               + ' ' + os.path.join(MIRROR_ROOT, temp_distro['mirror_addr'])
         work_queue.load_item(DistroRsync(name = distro_name,
-                                         command_line = distro_command_line,
-                                       #  command_line = 'uname -a',
+                                       #  command_line = distro_command_line,
+                                         command_line = 'uname -a',
                                          queue = work_queue,
                                          controler = main_controler,
-                                         server_log = server_log,
-                                         server_database = server_database))
+                                         server_log = server_log))
+                                         #server_database = server_database))
     main_controler.run()
