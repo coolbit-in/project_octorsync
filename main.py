@@ -199,7 +199,7 @@ if __name__ == '__main__':
     server_log = ServerLog()
     #server_database = StatusDatabase()
 
-    for distro_name in distro_args.keys():
+    for distro_name in sorted(distro_args.keys()):
         temp_distro = distro_args[distro_name]
         distro_command_line = RSYNC_BASE_6 \
                               + ' --exclude-from' \
