@@ -113,7 +113,7 @@ class DistroRsync(threading.Thread):
         if self.last_rsync_status == 'success':
             size = catch_info(self.log_file.name)
             if not size is None:
-               size = self.size
+               self.size = size
     #单次执行 rsync 的方法
     def __rsync_process(self):
         self.log_file.write('>>>>>>>>>>>>>>> %s' % time.asctime() + ' >>>>>>>>>>>>>>\n')
