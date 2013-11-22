@@ -19,7 +19,6 @@ MIRROR_ADDR = ubuntu
 
 ##OctoRsync 产生的日志
 OctoRsync 共生成了两种日志，一种是运行时日志，另一种是执行 Rsync 命令所产生的输出。
-![运行时日志](http://coolbit.in/images/octorsync_log.png)
 
 ##OctoRsync 如何启动
 ```bash
