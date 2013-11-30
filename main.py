@@ -203,7 +203,7 @@ if __name__ == '__main__':
         temp_distro = distro_args[distro_name]
         distro_command_line = RSYNC_BASE_6 \
                               + ' --exclude-from' \
-                              + ' ' + os.path.join(os.getcwd(),
+                              + ' ' + os.path.join(os.path.dirname(__file__),
                                                    temp_distro['exclude_file']) \
                               + ' ' + temp_distro['rsync_server'] \
                               + ' ' + os.path.join(MIRROR_ROOT, temp_distro['mirror_addr'])
