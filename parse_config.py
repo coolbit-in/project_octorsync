@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 import ConfigParser
-
+import os
 config_file_parser = ConfigParser.SafeConfigParser()
-config_file_parser.read('config.ini')
+config_file_parser.read(os.path.join(os.path.dirname(__file__), 'config.ini'))
 
 global_args = dict(config_file_parser.items('global'))
 
