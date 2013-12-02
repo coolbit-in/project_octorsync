@@ -108,4 +108,3 @@ EXCLUDE_FILE = exclude_files/epel.txt
 RSYNC_SERVER = rsync://mirrors6.ustc.edu.cn/epel
 MIRROR_ADDR = epel
 
-

@@ -208,8 +208,8 @@ if __name__ == '__main__':
                               + ' ' + temp_distro['rsync_server'] \
                               + ' ' + os.path.join(MIRROR_ROOT, temp_distro['mirror_addr'])
         work_queue.load_item(DistroRsync(name = distro_name,
-                                       #  command_line = distro_command_line,
-                                         command_line = 'uname -a',
+                                         command_line = distro_command_line,
+                                       #  command_line = 'uname -a',
                                          queue = work_queue,
                                          controler = main_controler,
                                          server_log = server_log))
