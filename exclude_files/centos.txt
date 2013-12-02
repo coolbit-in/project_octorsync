@@ -1,0 +1,15 @@
+2/
+2.*/
+3/
+3.*/
+4/
+4.*/
+5/
+5.*/
+graphics/
+dostools/
+RPM-GPG-KEY-CentOS-3
+RPM-GPG-KEY-CentOS-4
+RPM-GPG-KEY-CentOS-5
+RPM-GPG-KEY-centos4
+RPM-GPG-KEY-beta

@@ -87,3 +87,25 @@ MIRROR_ADDR = debian-multimedia
 EXCLUDE_FILE = exclude_files/debian.txt
 RSYNC_SERVER = rsync://mirrors6.ustc.edu.cn/debian-security
 MIRROR_ADDR = debian-security
+
+[CTAN]
+EXCLUDE_FILE = exclude_files/CTAN.txt
+RSYNC_SERVER = rsync://mirrors6.ustc.edu.cn/CTAN
+MIRROR_ADDR = CTAN
+
+[backtrack]
+EXCLUDE_FILE = exclude_files/backtrack.txt
+RSYNC_SERVER = rsync://mirrors6.ustc.edu.cn/backtrack
+MIRROR_ADDR = backtrack
+
+[centos]
+EXCLUDE_FILE = exclude_files/centos.txt
+RSYNC_SERVER = rsync://mirrors6.ustc.edu.cn/centos
+MIRROR_ADDR = centos
+
+[epel]
+EXCLUDE_FILE = exclude_files/epel.txt
+RSYNC_SERVER = rsync://mirrors6.ustc.edu.cn/epel
+MIRROR_ADDR = epel
+
+

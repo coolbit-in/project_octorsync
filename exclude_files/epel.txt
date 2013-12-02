@@ -1,0 +1,12 @@
+4/
+4AS/
+4ES/
+4WS/
+5/
+5Client/  
+5Server/ 
+beta/
+testing/
+ppc64/
+RPM-GPG-KEY-EPEL
+RPM-GPG-KEY-EPEL-6 
