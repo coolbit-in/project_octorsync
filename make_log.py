@@ -3,6 +3,7 @@ import logging
 import os
 from parse_config import LOG_ROOT, MAIN_LOG_ADDR
 
+
 class ServerLog():
     def __init__(self):
         if not os.path.exists(LOG_ROOT):

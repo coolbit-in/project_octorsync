@@ -6,8 +6,9 @@ import time
 from email.mime.text import MIMEText
 from email.header import Header
 
+
 class SendMail():
-    def __init__(self, msg = ''):
+    def __init__(self, msg=''):
         self.account_file = open(os.path.join(os.getcwd(), 'account.txt'), 'r')
         self.username = self.account_file.readline().replace('\n', '')
         self.password = self.account_file.readline().replace('\n', '')
@@ -15,7 +16,7 @@ class SendMail():
         self.to_addr = 'coolbit.in@gmail.com'
         self.smtp_server = 'smtp.gmail.com'
         self.text_file = open(os.path.join(os.getcwd(), 'mail.txt'), 'r')
-        self.msg  = msg
+        self.msg = msg
 
     def send(self):
         if self.msg == '':
@@ -25,13 +26,14 @@ class SendMail():
         else:
             message_string = self.msg
 
-        smtp_con = smtplib.SMTP(self.smtp_server, port = 587, timeout = 30)
+        smtp_con = smtplib.SMTP(self.smtp_server, port=587, timeout=30)
         smtp_con.set_debuglevel(1)
         smtp_con.starttls()
         smtp_con.login(self.username, self.password)
         smtp_con.sendmail(self.from_addr, self.to_addr, message_string)
         time.sleep(5)
         smtp_con.quit()
+
 
 if __name__ == '__main__':
     test_mail = SendMail('test by coolbit')

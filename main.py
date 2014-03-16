@@ -18,7 +18,7 @@ class WorkQueue():
 
     #从列表中载入实例
     def load_item(self, item):
-            self.queue.append(item)
+        self.queue.append(item)
 
     #封装了一下 len 函数,求队列长度
     def len(self):
@@ -61,8 +61,9 @@ class Controler():
         for item in self.queue.queue:
             item.setDaemon(True)
             item.start()
-        #调用 __refresh_status() 方法实现死循环
+            #调用 __refresh_status() 方法实现死循环
         self.__refresh_status()
+
 
 class DistroRsync(threading.Thread):
     def __init__(self, name, command_line, queue, controler, server_log):
@@ -100,8 +101,6 @@ class DistroRsync(threading.Thread):
         self.log_file = open(os.path.join(date_log_path, self.name + '.log'), 'a', 0)
 
 
-
-
     #部分变量的重新初始化
     def __re_init(self):
         self.server_log.info(self.name, 'Set status: idle')
@@ -113,14 +112,15 @@ class DistroRsync(threading.Thread):
         if self.last_rsync_status == 'success':
             size = catch_info(self.log_file.name)
             if not size is None:
-               self.size = size
-    #单次执行 rsync 的方法
+                self.size = size
+
+        #单次执行 rsync 的方法
     def __rsync_process(self):
         self.log_file.write('>>>>>>>>>>>>>>> %s' % time.asctime() + ' >>>>>>>>>>>>>>\n')
         #retcode 是 rsync 进程的退出代码
         retcode = subprocess.call(self.args,
-                                  stdout = self.log_file,
-                                  stderr = self.log_file)
+                                  stdout=self.log_file,
+                                  stderr=self.log_file)
         # rsync 实行次数+1
         self.rsynced_times += 1
         #若 retcode == 0 则说明 rsync 正确执行
@@ -138,9 +138,9 @@ class DistroRsync(threading.Thread):
                 self.server_log.info(self.name, 'Rsync successfully')
                 self.last_rsync_status = 'success'
                 self.last_rsync_time = time.strftime('%Y-%m-%d %H:%M:%S')
-        #        self.server_database.update_status(self.name, self.last_rsync_status)
+                #        self.server_database.update_status(self.name, self.last_rsync_status)
                 break
-            #如果 rsync 失败次数 == MAX_ERROR_TIMES 表明同步失败，发邮件警报
+                #如果 rsync 失败次数 == MAX_ERROR_TIMES 表明同步失败，发邮件警报
             self.server_log.warn(self.name, 'Rsync failed, the exit code: %d' % retcode)
 
             if self.rsynced_times == MAX_ERROR_TIMES:
@@ -153,11 +153,11 @@ class DistroRsync(threading.Thread):
                                     % MAX_ERROR_TIMES)
 
                 self.server_log.error(self.name, 'Rsync error %d times, STOP to synchronize'
-                                      % MAX_ERROR_TIMES)
+                                                 % MAX_ERROR_TIMES)
                 self.last_rsync_status = 'fail'
-        #        self.server_database.update_status(self.name, self.last_rsync_status)
+                #        self.server_database.update_status(self.name, self.last_rsync_status)
 
-        #self.server_database.update_last_rsync_time(self.name, self.last_rsync_time)
+                #self.server_database.update_last_rsync_time(self.name, self.last_rsync_time)
 
     #休眠过程
     def __sleep(self):
@@ -195,7 +195,7 @@ if __name__ == '__main__':
     pid_log.write(str(os.getpid()))
     pid_log.close()
     work_queue = WorkQueue()
-    main_controler = Controler(queue = work_queue)
+    main_controler = Controler(queue=work_queue)
     server_log = ServerLog()
     #server_database = StatusDatabase()
 
@@ -207,11 +207,11 @@ if __name__ == '__main__':
                                                    temp_distro['exclude_file']) \
                               + ' ' + temp_distro['rsync_server'] \
                               + ' ' + os.path.join(MIRROR_ROOT, temp_distro['mirror_addr'])
-        work_queue.load_item(DistroRsync(name = distro_name,
-                                         command_line = distro_command_line,
-                                       #  command_line = 'uname -a',
-                                         queue = work_queue,
-                                         controler = main_controler,
-                                         server_log = server_log))
-                                         #server_database = server_database))
+        work_queue.load_item(DistroRsync(name=distro_name,
+                                         command_line=distro_command_line,
+                                         #  command_line = 'uname -a',
+                                         queue=work_queue,
+                                         controler=main_controler,
+                                         server_log=server_log))
+        #server_database = server_database))
     main_controler.run()

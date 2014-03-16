@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 import ConfigParser
 import os
+
 config_file_parser = ConfigParser.SafeConfigParser()
 config_file_parser.read(os.path.join(os.path.dirname(__file__), 'config.ini'))
 
@@ -30,5 +31,4 @@ RSYNC_BASE_4 = global_args['rsync_base_4']
 #       MAX_BUSY_NUM, RSYNC_BASE_4, RSYNC_BASE_6, STATUS_LOG_ADDR, MAIN_LOG_ADDR]
 #print global_args
 #for item in config_file_parser.sections()[1:]:
-distro_args = dict((section_name, dict((key, value) for (key, value) in config_file_parser.items(section_name))) \
-           for section_name in config_file_parser.sections()[1:])
+distro_args = dict((section_name, dict((key, value) for (key, value) in config_file_parser.items(section_name))) for section_name in config_file_parser.sections()[1:])
